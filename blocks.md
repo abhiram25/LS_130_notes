@@ -164,8 +164,49 @@ increment(5)                            # => 6
    method ends.
 
 
+What would happen if we had a wrong number of arguments passed into a block?
 
+```Ruby
+def test
+  yield(1, 2)                           # passing 2 block arguments at block invocation time
+end
+
+# method invocation
+test { |num| puts num }
+```
+
+The above code outputs `1`.  The extra block argument is ignored. What happens if we pass in one 
+less block argument?
+
+```
+def test
+  yield(1)                              # passing 1 block argument at block invocation time
+end
+
+# method invocation
+test do |num1, num2|                    # expecting 2 parameters in block implementation
+  puts "#{num1} #{num2}"
+end
+```
                                             
+This still outputs `1`.  Why?
+
+In this case, `num2`, the block local variable is `nil`.  So the string interpolation converted that
+to an empty string.
+
+`nil.to_s == "" => true`
+
+Blocks are one way Ruby implements the idea of a _closure_.  The other two are instantiating a `Proc`
+object and using `lambda`.  
+
+The rules around enforcing the number of arguments you can call on a closure in Ruby is called
+its _arity_.  In Ruby, blocks have lenient arity, which is why it doesn't complain when you pass in 
+different number of arguments.
+
+`Proc` objects and `lambda`S have different arity rules.
+
+<h2> Return value of yielding to the block </h2>
+
 
 
 
