@@ -36,3 +36,38 @@ directory.  Now when we make references to the `Car` class, Ruby knows where to 
 On line 5, we finally create our test class.  This class must subclass `MiniTest::Test`.  This will allow our test class to 
 inherit all the necessary methods for writing tests.
 
+
+<h2>Skipping tests</h2>
+
+What happens when we want to skip tests?
+
+You could be in the middle of writing a test and do not want to run it yet, or for any other reason.
+
+Minitest allows us to use this using the `skip` word.
+
+```
+require 'minitest/autorun'
+require "minitest/reporters"
+Minitest::Reporters.use!
+
+require_relative 'car'
+
+class CarTest < MiniTest::Test
+  def test_wheels
+    car = Car.new
+    assert_equal(4, car.wheels)
+  end
+
+  def test_bad_wheels
+    skip
+    car = Car.new
+    assert_equal(3, car.wheels)
+  end
+end
+```
+
+Minitest also has a completely different syntax called _expectation_ or _spec-style_ syntax.
+
+In expectation style, tests are grouped into `describe` blocks and individual tests are written with
+the `it` method.  We no longer use assertions, and instead use _expectation matchers_.
+
