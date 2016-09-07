@@ -1,0 +1,110 @@
+<h1>Testing Equality</h1>
+
+When we use `assert_equal`, we are testing for value equality.
+
+What about object equality?
+
+Enter `assert_same`.
+
+```
+require 'minitest/autorun'
+
+class EqualityTest < Minitest::Test
+  def test_value_equality
+    str1 = "hi there"
+    str2 = "hi there"
+
+    assert_equal(str1, str2)
+    assert_same(str1, str2)
+  end
+end
+```
+
+If you run the above test, the method `assert_equal` will pass, while the `assert_same` will fail and
+throw an error like this.
+
+```
+EqualityTest#test_value_equality [practice.rb:9]:
+Expected "hi there" (oid=70200800100280) to be the same as "hi there" (oid=70200800100300).
+```
+
+So `assert_same` corresponds to object equality, they must be the same object.
+
+<h2>Equality with a custom class</h2>
+
+So we can get a way with using `assert_equal` on strings, arrays, hashes, etc.
+
+What if we tried to use `assert_equal` on our own custom classes?
+
+```
+class Car
+  attr_accessor :wheels, :name
+
+  def initialize
+    @wheels = 4
+  end
+end
+
+class CarTest < MiniTest::Test
+  def test_value_equality
+    car1 = Car.new
+    car2 = Car.new
+
+    car1.name = "Kim"
+    car2.name = "Kim"
+
+    assert_equal(car1, car2)
+  end
+end
+```
+
+Running the above test will result in
+
+```
+# Running:
+
+CarTest F
+
+Finished in 0.021080s, 47.4375 runs/s, 47.4375 assertions/s.
+
+  1) Failure:
+CarTest#test_value_equality [car_test.rb:48]:
+No visible difference in the Car#inspect output.
+You should look at the implementation of #== on Car or its members.
+#<Car:0xXXXXXX @wheels=4, @name="Kim">
+
+1 runs, 1 assertions, 1 failures, 0 errors, 0 skips
+```
+
+Basically `Minitest` doesn't know how to assert the value equality here.  It even tells us that we should use the `==` method in Car.
+
+```
+class Car
+  attr_accessor :wheels, :name
+
+  def initialize
+    @wheels = 4
+  end
+
+  def ==(other)                       # assert_equal would fail without this method
+    other.is_a?(Car) && name == other.name
+  end
+end
+```
+
+```
+class CarTest < MiniTest::Test
+  def test_value_equality
+    car1 = Car.new
+    car2 = Car.new
+
+    car1.name = "Kim"
+    car2.name = "Kim"
+
+    assert_equal(car1, car2)          # this will pass
+    assert_same(car1, car2)           # this will fail
+  end
+end
+```
+
+Because we defined the `==` method, we are now able to call `assert_equal` on `Car` objects.
